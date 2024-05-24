@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Application</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    form {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+    #messages li {
+      padding: 8px 12px;
+      border-bottom: 1px solid #ccc;
+    }
+    #messageInput {
+      width: calc(100% - 60px);
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #sendMessageBtn {
+      width: 60px;
+      padding: 10px;
+      box-sizing: border-box;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #sendMessageBtn:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div id="registrationForm">
+    <h2>Registration</h2>
+    <form id="registerForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <input type="submit" value="Register">
+    </form>
+    <p>Already have an account? <a href="#" onclick="showLoginForm()">Login</a></p>
+  </div>
+
+  <div id="loginForm" style="display: none;">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <input type="submit" value="Login">
+    </form>
+    <p>Don't have an account? <a href="#" onclick="showRegistrationForm()">Register</a></p>
+  </div>
+
+  <div id="chatContainer" style="display: none;" class="chat-container">
+    <h2>Chat</h2>
+    <ul id="messages"></ul>
+    <input type="text" id="messageInput" placeholder="Type your message...">
+    <button id="sendMessageBtn">Send</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const registrationForm = document.getElementById('registrationForm');
+    const loginForm = document.getElementById('loginForm');
+    const chatContainer = document.getElementById('chatContainer');
+
+    const registerForm = document.getElementById('registerForm');
+    const loginFormElem = document.getElementById('loginForm');
+    const messageInput = document.getElementById('messageInput');
+    const sendMessageBtn = document.getElementById('sendMessageBtn');
+    const messages = document.getElementById('messages');
+
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const response = await fetch('/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert("Registration success");
+      } else {
+        alert("Registration failed: " + data.message);
+      }
+    });
+
+    loginFormElem.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const response = await fetch('/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const { token } = await response.json();
+      localStorage.setItem('token', token);
+      showChat();
+    });
+
+    function showLoginForm() {
+      registrationForm.style.display = 'none';
+      loginForm.style.display = 'block';
+    }
+
+    function showRegistrationForm() {
+      registrationForm.style.display = 'block';
+      loginForm.style.display = 'none';
+    }
+
+    function showChat() {
+      registrationForm.style.display = 'none';
+      loginForm.style.display = 'none';
+      chatContainer.style.display = 'block';
+    }
+
+    sendMessageBtn.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (message !== '') {
+        socket.emit('sendMessage', message);
+        messageInput.value = '';
+      }
+    });
+
+    socket.on('receiveMessage', message => {
+      const li = document.createElement('li');
+      li.textContent = message;
+      messages.appendChild(li);
+    });
+  </script>
+</body>
+</html>
