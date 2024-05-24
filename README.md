@@ -29,13 +29,33 @@ This project is a backend for a real-time chat application built using the MERN 
    node app.js
    ```
 ## Routes
-   # POST /api/auth/register
+
+   ### POST /api/auth/register
 
    Request: { "email": "example@example.com", "password": "password123" }
    Response: { "token": "<jwt_token>" }
    
-   # POST /api/auth/login
+   ### POST /api/auth/login
    Request: { "email": "example@example.com", "password": "password123" }
    Response: { "token": "<jwt_token>" }
+
+## Chat Routes
+
+   ### POST /api/chat/send
+
+   Request: { "recipient": "<recipient_id>", "message": "Hello!" }
+   Response: { "message": "<message_object>" }
+
+   ### GET /api/chat/messages/:userId
+   Request: Bearer <jwt_token>
+   Response: [ { "message": "<message_object>" }, ... ]
+
+## Status Routes
+
+   ### POST /api/status
+   Request: { "status": "AVAILABLE" | "BUSY" }
+   Response: { "user": "<user_object>" }
+
+   
 
 
