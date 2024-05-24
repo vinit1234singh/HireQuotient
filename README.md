@@ -1,4 +1,4 @@
-# Real-Time Chat Application Backend
+# HireQuotient Assesment
 
 ## Overview
 
@@ -28,5 +28,14 @@ This project is a backend for a real-time chat application built using the MERN 
    ```bash
    node app.js
    ```
+## Routes
+   # POST /api/auth/register
+
+   Request: { "email": "example@example.com", "password": "password123" }
+   Response: { "token": "<jwt_token>" }
+   
+   # POST /api/auth/login
+   Request: { "email": "example@example.com", "password": "password123" }
+   Response: { "token": "<jwt_token>" }
 
 
